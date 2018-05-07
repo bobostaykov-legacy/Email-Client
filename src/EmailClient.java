@@ -8,7 +8,7 @@ import java.awt.event.WindowEvent;
 
 public class EmailClient {
 
-    //proba
+    //proba2
 
     // declaring variables global so they can be used in any method
     private static JFrame mainFrame = new JFrame("Bobo's email client");
