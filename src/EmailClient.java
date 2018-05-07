@@ -8,8 +8,6 @@ import java.awt.event.WindowEvent;
 
 public class EmailClient {
 
-    //proba2
-
     // declaring variables global so they can be used in any method
     private static JFrame mainFrame = new JFrame("Bobo's email client");
     private static JPanel mainPanel = new JPanel(new GridBagLayout());
