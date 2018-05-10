@@ -5,6 +5,9 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 public class EmailClient {
 
@@ -27,14 +30,34 @@ public class EmailClient {
     private static JLabel labelFrom = new JLabel("From:");
     private static JLabel labelTo = new JLabel("To:");
     private static JLabel labelSubject = new JLabel("Subject:");
+    private static Connection connection;
 
 
     public static void main(String[] args) {
 
         EmailClient emailClient = new EmailClient();
 
-        emailClient.createAll(Theme.BEIGE);
+        connection = emailClient.createConnection();
 
+        emailClient.createAll();
+
+    }
+
+
+
+    public Connection createConnection(){
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection con = DriverManager.getConnection("jdbc:mysql://sql7.freemysqlhosting.net:3306/sql7237193?autoReconnect=true&useSSL=false", "sql7237193", "mWkHzYHaeD");
+            System.out.println("Successfully connected to database!");
+            return con;
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
 
@@ -388,6 +411,23 @@ public class EmailClient {
         options.add(exit);
         exit.addActionListener(e -> System.exit(0));
 
+
+
+
+        JMenu session = new JMenu("Session");
+        menuBar.add(session);
+
+        JMenuItem saveSession = new JMenuItem("Save");
+        session.add(saveSession);
+        saveSession.addActionListener(new ActionSaveSession());
+
+        JMenuItem restoreSession = new JMenuItem("Restore");
+        session.add(restoreSession);
+        saveSession.addActionListener(new ActionRestoreSession());
+
+
+
+
         JMenu help = new JMenu("Help");
         menuBar.add(help);
 
@@ -424,7 +464,7 @@ public class EmailClient {
 
 
     // creating all components
-    private void createAll(Theme theme){
+    private void createAll(){
 
         this.createMainFrame();
 
@@ -445,7 +485,7 @@ public class EmailClient {
 
 
 
-    // getting the current theme
+    // get the current theme
     public Theme getTheme(){
         if (sendButton.getBackground().equals(new Color(0xF0E09B))) return Theme.BEIGE;
         if (sendButton.getBackground().equals(new Color(0x4BA2C7))) return Theme.BLUE;
@@ -475,6 +515,21 @@ public class EmailClient {
 
     public String getPass() {
         return new String (textFieldPassword.getPassword());
+    }
+
+    public Connection getConnecion() {
+        return connection;
+    }
+
+    public void restoreSession(String user, String to, String subject, String text, int theme){
+
+        textFieldUsername.setText(user);
+        textFieldTo.setText(to);
+        textFieldSubject.setText(subject);
+        mainText.setText(text);
+        if (theme == 1) setPanelTheme(Theme.BLUE);
+        if (theme == 2) setPanelTheme(Theme.PINK);
+        if (theme == 3) setPanelTheme(Theme.BLACK);
     }
 
 }
