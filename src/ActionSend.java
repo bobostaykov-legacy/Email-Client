@@ -1,11 +1,9 @@
-import java.awt.*;
 import java.util.Properties;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -50,41 +48,14 @@ public class ActionSend implements ActionListener {
             // providing user information to log into Google
             send(message, ec.getUsername(), ec.getPass());
 
-
-            // creating "e-mail sent" dialog
-            JOptionPane optionPane = new JOptionPane("The E-mail was sent successfully!", JOptionPane.INFORMATION_MESSAGE);
-            JPanel buttonPanel = (JPanel)optionPane.getComponent(1);
-            JButton buttonOk = (JButton)buttonPanel.getComponent(0);
-            buttonOk.setPreferredSize(new Dimension(43, 25));
-            // setting "ok" button background color, depending on the current theme
-            buttonOk.setBackground(ec.getTheme().equals(Theme.BEIGE) ? new Color(0xF0E09B) : ( ec.getTheme().equals(Theme.BLUE) ? new Color(0x4BA2C7) : ( ec.getTheme().equals(Theme.PINK) ? new Color(0xD67A98) : new Color(0x1F1F1F) ) ) );
-            if (ec.getTheme().equals(Theme.BLACK)) buttonOk.setForeground(Color.WHITE);
-            else buttonOk.setForeground(Color.BLACK);
-            buttonOk.setBorder(BorderFactory.createLineBorder(new Color(0x858585)));
-            buttonOk.setFocusPainted(false);
-            JDialog dialog = optionPane.createDialog(null, "E-mail sent");
-            dialog.setVisible(true);
-
+            ec.successDialog("The E-mail was sent successfully!", "E-mail sent");
 
         } catch (MessagingException ex) {
 
             ex.printStackTrace();
 
             // if there was a problem while sending the message
-
-            // creating "error" dialog
-            JOptionPane optionPane = new JOptionPane("   Something went wrong...", JOptionPane.ERROR_MESSAGE);
-            JPanel buttonPanel = (JPanel)optionPane.getComponent(1);
-            JButton buttonOk = (JButton)buttonPanel.getComponent(0);
-            buttonOk.setPreferredSize(new Dimension(43, 25));
-            // setting "ok" button background color, depending on the current theme
-            buttonOk.setBackground(ec.getTheme().equals(Theme.BEIGE) ? new Color(0xF0E09B) : ( ec.getTheme().equals(Theme.BLUE) ? new Color(0x4BA2C7) : ( ec.getTheme().equals(Theme.PINK) ? new Color(0xD67A98) : new Color(0x1F1F1F) ) ) );
-            if (ec.getTheme().equals(Theme.BLACK)) buttonOk.setForeground(Color.WHITE);
-            else buttonOk.setForeground(Color.BLACK);
-            buttonOk.setBorder(BorderFactory.createLineBorder(new Color(0x858585)));
-            buttonOk.setFocusPainted(false);
-            JDialog dialog = optionPane.createDialog(null, "Error");
-            dialog.setVisible(true);
+            ec.errorDialog("Something went wrong...");
         }
 
     }

@@ -9,23 +9,26 @@ public class ActionRestoreSession implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+
+        ActionSaveSession ss = new ActionSaveSession();
+        if (!ec.ipInDatabase()) {
+            ec.errorDialog("You haven't saved any session yet.");
+            return;
+        }
+
         if (ip == null){
-            errorRestoringSession();
+            ec.errorDialog("There was an error restoring your session.");
             return;
         }
 
         // getting values from database
-        String user = (String)getValue("user");
-        String to = (String)getValue("toText");
-        String subject = (String)getValue("subject");
-        String text = (String)getValue("mailText");
+        String user = getValue("user");
+        String to = getValue("toText");
+        String subject = getValue("subject");
+        String text = getValue("mailText");
         int theme = Integer.parseInt(getValue("theme"));
 
         ec.restoreSession(user, to, subject, text, theme);
-    }
-
-    private static void errorRestoringSession(){
-        //TODO: show error window - "there was a problem restoring your session"
     }
 
     private static String getValue(String column){

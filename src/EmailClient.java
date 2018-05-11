@@ -1,15 +1,10 @@
 import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class EmailClient {
 
@@ -19,7 +14,6 @@ public class EmailClient {
     private static GridBagConstraints constraints = new GridBagConstraints();
     private static JTextField textFieldUsername = new JTextField(32);
     private static JPasswordField textFieldPassword = new JPasswordField(32);
-    private static JTextField textFieldFrom = new JTextField(32);
     private static JTextField textFieldTo = new JTextField(32);
     private static JTextField textFieldSubject = new JTextField(32);
     private static JTextPane mainText = new JTextPane();
@@ -32,6 +26,7 @@ public class EmailClient {
     private static JLabel labelTo = new JLabel("To:");
     private static JLabel labelSubject = new JLabel("Subject:");
     private static Connection connection;
+    private static boolean sessionSaved = false;
 
 
     public static void main(String[] args) {
@@ -65,7 +60,15 @@ public class EmailClient {
 
     // creating the main frame
     private void createMainFrame(){
-        mainFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        mainFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        mainFrame.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                saveQuestion();
+                System.exit(0);
+            }
+        });
+
         // positioning tha main frame in the middle of the screen, no matter how big it is
         double screenWidth = Toolkit.getDefaultToolkit().getScreenSize().getWidth();
         double screenHeight = Toolkit.getDefaultToolkit().getScreenSize().getHeight();
@@ -318,6 +321,20 @@ public class EmailClient {
         mainPanel.add(sendButton, constraints);
 
 
+        boldButton.setAction(new StyledEditorKit.BoldAction());
+        boldButton.setPreferredSize(new Dimension(43,35));
+        boldButton.setText("B");
+        boldButton.setBackground(new Color(0xF0E09B));
+        boldButton.setBorder(BorderFactory.createLineBorder(new Color(0x858585)));
+        boldButton.setFocusPainted(false);
+        boldButton.setFont(new Font("Times New Roman", Font.BOLD, 14));
+        constraints.gridx = 2;
+        constraints.gridy = 1;
+        constraints.gridheight = 2;
+        constraints.gridwidth = 2;
+        constraints.insets = new Insets(0,0,15,110);
+        mainPanel.add(boldButton, constraints);
+
         // creating text edit buttons
         italicButton.setAction(new StyledEditorKit.ItalicAction());
         italicButton.setPreferredSize(new Dimension(43,35));
@@ -326,8 +343,8 @@ public class EmailClient {
         italicButton.setBorder(BorderFactory.createLineBorder(new Color(0x858585)));
         italicButton.setFocusPainted(false);
         italicButton.setFont(new Font("Times New Roman", Font.ITALIC, 14));
-        constraints.gridx = 3;
-        constraints.gridy = 2;
+        constraints.gridx = 2;
+        constraints.gridy = 1;
         constraints.insets = new Insets(0,0,15,0);
         mainPanel.add(italicButton, constraints);
 
@@ -338,22 +355,10 @@ public class EmailClient {
         underlineButton.setBorder(BorderFactory.createLineBorder(new Color(0x858585)));
         underlineButton.setFocusPainted(false);
         underlineButton.setFont(new Font("Times New Roman", Font.PLAIN, 14));
-        constraints.gridx = 3;
-        constraints.gridy = 2;
+        constraints.gridx = 2;
+        constraints.gridy = 1;
         constraints.insets = new Insets(0,110,15,0);
         mainPanel.add(underlineButton, constraints);
-
-        boldButton.setAction(new StyledEditorKit.BoldAction());
-        boldButton.setPreferredSize(new Dimension(43,35));
-        boldButton.setText("B");
-        boldButton.setBackground(new Color(0xF0E09B));
-        boldButton.setBorder(BorderFactory.createLineBorder(new Color(0x858585)));
-        boldButton.setFocusPainted(false);
-        boldButton.setFont(new Font("Times New Roman", Font.BOLD, 14));
-        constraints.gridx = 3;
-        constraints.gridy = 2;
-        constraints.insets = new Insets(0,0,15,110);
-        mainPanel.add(boldButton, constraints);
 
     }
 
@@ -377,7 +382,7 @@ public class EmailClient {
 
         JMenuItem exit = new JMenuItem("Exit");
         options.add(exit);
-        exit.addActionListener(e -> System.exit(0));
+        exit.addActionListener(e -> {saveQuestion(); System.exit(0);});
 
 
 
@@ -451,6 +456,8 @@ public class EmailClient {
         this.createMenuBar();
 
         mainFrame.setVisible(true);
+
+        whatsNew();
     }
 
 
@@ -485,6 +492,14 @@ public class EmailClient {
 
     public Connection getConnecion() {
         return connection;
+    }
+
+    public boolean getSessionSaved(){
+        return sessionSaved;
+    }
+
+    public void setSessionSaved(boolean b){
+        sessionSaved = b;
     }
 
     public void restoreSession(String user, String to, String subject, String text, int theme){
@@ -532,6 +547,234 @@ public class EmailClient {
             return null;
         }
         return IP.toString();
+    }
+
+    public boolean ipInDatabase(){
+        String ip = getIP();
+        Statement stmt;
+        boolean res = false;
+        try {
+            stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery("select ip from email_client");
+            while (rs.next()) {
+                String ips = rs.getString("ip");
+                if (ip != null && ip.equals(ips)){
+                    res = true;
+                    break;
+                }
+            }
+            rs.close();
+            stmt.close();
+        } catch (SQLException e1) {
+            e1.printStackTrace();
+        }
+        return res;
+    }
+
+    public void addIpToDB(){
+        String ip = getIP();
+        PreparedStatement prSt;
+        try {
+            prSt = connection.prepareStatement("insert into email_client values (?, '', '', '', '', 0)");
+            prSt.setString(1, ip);
+            prSt.execute();
+            prSt.close();
+        } catch (SQLException e1) {
+            e1.printStackTrace();
+            errorDialog("There was a problem saving your session.");
+        }
+    }
+
+    public void errorDialog(String message){
+
+        JOptionPane optionPane = new JOptionPane(message, JOptionPane.ERROR_MESSAGE);
+        JPanel buttonPanel = (JPanel)optionPane.getComponent(1);
+        JButton buttonOk = (JButton)buttonPanel.getComponent(0);
+
+        buttonOk.setPreferredSize(new Dimension(43, 25));
+        // setting "ok" button background color, depending on the current theme
+        buttonOk.setBackground(getTheme().equals(Theme.BEIGE) ? new Color(0xF0E09B) : ( getTheme().equals(Theme.BLUE) ? new Color(0x4BA2C7) : ( getTheme().equals(Theme.PINK) ? new Color(0xD67A98) : new Color(0x1F1F1F) ) ) );
+
+        if (getTheme().equals(Theme.BLACK)) buttonOk.setForeground(Color.WHITE);
+        else buttonOk.setForeground(Color.BLACK);
+
+        buttonOk.setBorder(BorderFactory.createLineBorder(new Color(0x858585)));
+        buttonOk.setFocusPainted(false);
+
+        JDialog dialog = optionPane.createDialog(null, "Error");
+        dialog.setVisible(true);
+    }
+
+    public void successDialog(String message, String title){
+
+        JOptionPane optionPane = new JOptionPane(message, JOptionPane.INFORMATION_MESSAGE);
+        JPanel buttonPanel = (JPanel)optionPane.getComponent(1);
+        JButton buttonOk = (JButton)buttonPanel.getComponent(0);
+
+        buttonOk.setPreferredSize(new Dimension(50, 25));
+        // setting "ok" button background color, depending on the current theme
+        buttonOk.setBackground(getTheme().equals(Theme.BEIGE) ? new Color(0xF0E09B) : ( getTheme().equals(Theme.BLUE) ? new Color(0x4BA2C7) : ( getTheme().equals(Theme.PINK) ? new Color(0xD67A98) : new Color(0x1F1F1F) ) ) );
+
+        if (getTheme().equals(Theme.BLACK)) buttonOk.setForeground(Color.WHITE);
+        else buttonOk.setForeground(Color.BLACK);
+
+        buttonOk.setBorder(BorderFactory.createLineBorder(new Color(0x858585)));
+        buttonOk.setFocusPainted(false);
+
+        JDialog dialog = optionPane.createDialog(null, title);
+        dialog.setVisible(true);
+    }
+
+    public void customOptionPane(String message, String title){
+
+        JButton buttonOk = new JButton("OK");
+        JButton buttonExit = new JButton("Exit");
+
+        buttonOk.setPreferredSize(new Dimension(50, 25));
+        buttonExit.setPreferredSize(new Dimension(50, 25));
+        // setting buttons background color, depending on the current theme
+        buttonOk.setBackground(getTheme().equals(Theme.BEIGE) ? new Color(0xF0E09B) : ( getTheme().equals(Theme.BLUE) ? new Color(0x4BA2C7) : ( getTheme().equals(Theme.PINK) ? new Color(0xD67A98) : new Color(0x1F1F1F) ) ) );
+        buttonExit.setBackground(getTheme().equals(Theme.BEIGE) ? new Color(0xF0E09B) : ( getTheme().equals(Theme.BLUE) ? new Color(0x4BA2C7) : ( getTheme().equals(Theme.PINK) ? new Color(0xD67A98) : new Color(0x1F1F1F) ) ) );
+
+        if (getTheme().equals(Theme.BLACK)){
+            buttonOk.setForeground(Color.WHITE);
+            buttonExit.setForeground(Color.WHITE);
+        } else {
+            buttonOk.setForeground(Color.BLACK);
+            buttonExit.setForeground(Color.BLACK);
+        }
+
+        buttonOk.setBorder(BorderFactory.createLineBorder(new Color(0x858585)));
+        buttonExit.setBorder(BorderFactory.createLineBorder(new Color(0x858585)));
+        buttonOk.setFocusPainted(false);
+        buttonExit.setFocusPainted(false);
+
+        buttonOk.addActionListener(al -> JOptionPane.getRootFrame().dispose());
+        buttonExit.addActionListener(al -> System.exit(0));
+
+        Object[] options = {buttonOk, buttonExit};
+        JOptionPane.showOptionDialog(null,
+                                        message,
+                                        title,
+                                        JOptionPane.YES_NO_OPTION,
+                                        JOptionPane.INFORMATION_MESSAGE,
+                                        null,
+                                        options,
+                                        "default");
+    }
+
+    public void saveQuestion(){
+
+        if ((!getUsername().equals("Your Google e-mail address...")
+                || !getToText().equals("E-mail...")
+                || !getSubject().equals("")
+                || !getMailText().equals("Enter your message here...")) && !getSessionSaved() ){
+
+
+            JButton buttonYes = new JButton("Yes");
+            JButton buttonNo = new JButton("No");
+
+            buttonYes.setPreferredSize(new Dimension(50, 25));
+            buttonNo.setPreferredSize(new Dimension(50, 25));
+            // setting buttons background color, depending on the current theme
+            buttonYes.setBackground(getTheme().equals(Theme.BEIGE) ? new Color(0xF0E09B) : ( getTheme().equals(Theme.BLUE) ? new Color(0x4BA2C7) : ( getTheme().equals(Theme.PINK) ? new Color(0xD67A98) : new Color(0x1F1F1F) ) ) );
+            buttonNo.setBackground(getTheme().equals(Theme.BEIGE) ? new Color(0xF0E09B) : ( getTheme().equals(Theme.BLUE) ? new Color(0x4BA2C7) : ( getTheme().equals(Theme.PINK) ? new Color(0xD67A98) : new Color(0x1F1F1F) ) ) );
+
+            if (getTheme().equals(Theme.BLACK)){
+                buttonYes.setForeground(Color.WHITE);
+                buttonNo.setForeground(Color.WHITE);
+            } else {
+                buttonYes.setForeground(Color.BLACK);
+                buttonNo.setForeground(Color.BLACK);
+            }
+
+            buttonYes.setBorder(BorderFactory.createLineBorder(new Color(0x858585)));
+            buttonNo.setBorder(BorderFactory.createLineBorder(new Color(0x858585)));
+            buttonYes.setFocusPainted(false);
+            buttonNo.setFocusPainted(false);
+
+            buttonYes.addActionListener(e -> {
+                new ActionSaveSession().actionPerformed(e);
+                JOptionPane.getRootFrame().dispose();
+            });
+            buttonNo.addActionListener(al -> JOptionPane.getRootFrame().dispose());
+
+            Object[] options = {buttonYes, buttonNo};
+            JOptionPane.showOptionDialog(null,
+                    "Do you want to save your session?",
+                    "Save session",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    options,
+                    "default");
+        }
+    }
+
+    private void whatsNew(){
+        ActionSaveSession ss = new ActionSaveSession();
+        if (!ipInDatabase()){
+
+            GridBagConstraints con = new GridBagConstraints();
+            JFrame whatsNewFrame = new JFrame("What's new");
+            whatsNewFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+            // setting the frame's size and positioning it in the middle of the screen
+            double screenWidth = Toolkit.getDefaultToolkit().getScreenSize().getWidth();
+            double screenHeight = Toolkit.getDefaultToolkit().getScreenSize().getHeight();
+            whatsNewFrame.setBounds(((int)screenWidth - 450)/2, ((int)screenHeight - 280)/2,550, 250);
+
+            JPanel aboutPanel = new JPanel(new GridBagLayout());
+            whatsNewFrame.getContentPane().add(aboutPanel, BorderLayout.CENTER);
+
+            // labels that contain the information
+            JLabel label1 = new JLabel("What's new in version 1.2?");
+            JLabel label2 = new JLabel("");
+            JLabel label3 = new JLabel("- You can now save your session and restore it whenever you want");
+            JLabel label4 = new JLabel("- Some UI changes");
+
+            // creating an "ok" button
+            JButton okBut = new JButton("OK");
+            okBut.setPreferredSize(new Dimension(43,25));
+            // setting "ok" button background color, depending on the current theme
+            okBut.setBackground(getTheme().equals(Theme.BEIGE) ? new Color(0xF0E09B) : ( getTheme().equals(Theme.BLUE) ? new Color(0x4BA2C7) : ( getTheme().equals(Theme.PINK) ? new Color(0xD67A98) : new Color(0x1F1F1F) ) ) );
+            if (getTheme().equals(Theme.BLACK)) okBut.setForeground(Color.WHITE);
+            else okBut.setForeground(Color.BLACK);
+            okBut.setBorder(BorderFactory.createLineBorder(new Color(0x858585)));
+            okBut.setFocusPainted(false);
+            // after pressing the "ok" button the frame closes
+            okBut.addActionListener(ex -> whatsNewFrame.dispatchEvent(new WindowEvent(whatsNewFrame, WindowEvent.WINDOW_CLOSING)));
+
+            // adding the information
+            con.gridx = 0;
+            con.gridy = 0;
+            con.insets = new Insets(25,0,0,0);
+            aboutPanel.add(label1, con);
+
+            con.gridx = 0;
+            con.gridy = 1;
+            con.insets = new Insets(30,0,0,0);
+            aboutPanel.add(label2, con);
+
+            con.gridx = 0;
+            con.gridy = 2;
+            con.insets = new Insets(5,0,0,0);
+            aboutPanel.add(label3, con);
+
+            con.gridx = 0;
+            con.gridy = 3;
+            con.insets = new Insets(15,0,20,0);
+            aboutPanel.add(label4, con);
+
+            con.gridx = 0;
+            con.gridy = 4;
+            aboutPanel.add(okBut, con);
+
+            whatsNewFrame.setVisible(true);
+
+            addIpToDB();
+        }
+
     }
 
 }
