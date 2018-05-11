@@ -14,7 +14,10 @@ public class ActionSaveSession implements ActionListener {
         // get text from all fields (except password) + theme
         Statement stmt;
         PreparedStatement prSt;
-        String ip = null;
+
+        String ip = EmailClient.getIP();
+        if (ip == null) errorSavingSession();
+
         boolean isInDatabase = false;
         String savedUsername = ec.getUsername();
         String savedToText = ec.getToText();
@@ -25,16 +28,6 @@ public class ActionSaveSession implements ActionListener {
         if (ec.getTheme() == Theme.BLUE) savedTheme = 1;
         if (ec.getTheme() == Theme.PINK) savedTheme = 2;
         if (ec.getTheme() == Theme.BLACK) savedTheme = 3;
-
-        // get the IP address of the computer on which the program is being used,
-        // that way the database knows which information to resore
-        try {
-            InetAddress IP = InetAddress.getLocalHost();
-            ip = IP.toString();
-        } catch (UnknownHostException e1) {
-            e1.printStackTrace();
-            errorSavingSession();
-        }
 
         // create a connection to the database
         Connection con = ec.getConnecion();
@@ -54,6 +47,8 @@ public class ActionSaveSession implements ActionListener {
                     break;
                 }
             }
+            rs.close();
+            stmt.close();
         } catch (SQLException e1) {
             e1.printStackTrace();
         }

@@ -5,6 +5,8 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -27,7 +29,6 @@ public class EmailClient {
     private static JButton sendButton = new JButton("Send");
     private static JLabel labelUsername = new JLabel("Username:");
     private static JLabel labelPassword = new JLabel("Password:");
-    private static JLabel labelFrom = new JLabel("From:");
     private static JLabel labelTo = new JLabel("To:");
     private static JLabel labelSubject = new JLabel("Subject:");
     private static Connection connection;
@@ -99,7 +100,6 @@ public class EmailClient {
             underlineButton.setBackground(new Color(0x1F1F1F));
             labelUsername.setForeground(Color.WHITE);
             labelPassword.setForeground(Color.WHITE);
-            labelFrom.setForeground(Color.WHITE);
             labelTo.setForeground(Color.WHITE);
             labelSubject.setForeground(Color.WHITE);
             boldButton.setForeground(Color.WHITE);
@@ -111,7 +111,6 @@ public class EmailClient {
 
             labelUsername.setForeground(Color.BLACK);
             labelPassword.setForeground(Color.BLACK);
-            labelFrom.setForeground(Color.BLACK);
             labelTo.setForeground(Color.BLACK);
             labelSubject.setForeground(Color.BLACK);
             boldButton.setForeground(Color.BLACK);
@@ -159,11 +158,11 @@ public class EmailClient {
         mainText.setFont(new Font("Arial", Font.ITALIC, 14));
         // setting font color
         mainText.setForeground(new Color(0x8E8987));
-        mainText.setText("Enter your E-mail here...");
+        mainText.setText("Enter your message here...");
         mainText.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
-                if (mainText.getText().equals("Enter your E-mail here...")) mainText.setText("");
+                if (mainText.getText().equals("Enter your message here...")) mainText.setText("");
                 mainText.setFont(new Font("Arial", Font.PLAIN, 14));
                 mainText.setForeground(Color.BLACK);
             }
@@ -173,7 +172,7 @@ public class EmailClient {
                 if (mainText.getText().equals("")){
                     mainText.setFont(new Font("Arial", Font.ITALIC, 14));
                     mainText.setForeground(new Color(0x8E8987));
-                    mainText.setText("Enter your E-mail here...");
+                    mainText.setText("Enter your message here...");
                 }
             }
         });
@@ -192,11 +191,11 @@ public class EmailClient {
         textFieldUsername.setFont(new Font("Arial", Font.ITALIC, 14));
         // setting font color
         textFieldUsername.setForeground(new Color(0x8E8987));
-        textFieldUsername.setText("Your Google username...");
+        textFieldUsername.setText("Your Google e-mail address...");
         textFieldUsername.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
-                if (textFieldUsername.getText().equals("Your Google username...")) textFieldUsername.setText("");
+                if (textFieldUsername.getText().equals("Your Google e-mail address...")) textFieldUsername.setText("");
                 textFieldUsername.setFont(new Font("Arial", Font.PLAIN, 14));
                 textFieldUsername.setForeground(Color.BLACK);
             }
@@ -205,7 +204,7 @@ public class EmailClient {
                 if (textFieldUsername.getText().equals("")){
                     textFieldUsername.setFont(new Font("Arial", Font.ITALIC, 14));
                     textFieldUsername.setForeground(new Color(0x8E8987));
-                    textFieldUsername.setText("Your Google username...");
+                    textFieldUsername.setText("Your Google e-mail address...");
                 }
             }
         });
@@ -247,33 +246,6 @@ public class EmailClient {
         mainPanel.add(textFieldPassword, constraints);
 
         // setting a description font that disappears when the text field gains focus
-        textFieldFrom.setFont(new Font("Arial", Font.ITALIC, 14));
-        // setting font color
-        textFieldFrom.setForeground(new Color(0x8E8987));
-        textFieldFrom.setText("E-mail...");
-        textFieldFrom.addFocusListener(new FocusListener() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                if (textFieldFrom.getText().equals("E-mail...")) textFieldFrom.setText("");
-                textFieldFrom.setFont(new Font("Arial", Font.PLAIN, 14));
-                textFieldFrom.setForeground(Color.BLACK);
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                if (textFieldFrom.getText().equals("")){
-                    textFieldFrom.setFont(new Font("Arial", Font.ITALIC, 14));
-                    textFieldFrom.setForeground(new Color(0x8E8987));
-                    textFieldFrom.setText("E-mail...");
-                }
-            }
-        });
-        constraints.gridx = 1;
-        constraints.gridy = 1;
-        constraints.insets = new Insets(0,10,20,10);
-        mainPanel.add(textFieldFrom, constraints);
-
-        // setting a description font that disappears when the text field gains focus
         textFieldTo.setFont(new Font("Arial", Font.ITALIC, 14));
         // setting font color
         textFieldTo.setForeground(new Color(0x8E8987));
@@ -295,9 +267,9 @@ public class EmailClient {
                 }
             }
         });
-        constraints.gridx = 3;
+        constraints.gridx = 1;
         constraints.gridy = 1;
-        constraints.insets = new Insets(0,0,20,0);
+        constraints.insets = new Insets(0,10,20,10);
         mainPanel.add(textFieldTo, constraints);
 
         textFieldSubject.setFont(new Font("Arial", Font.PLAIN, 14));
@@ -322,10 +294,6 @@ public class EmailClient {
         mainPanel.add(labelPassword, constraints);
 
         constraints.gridx = 0;
-        constraints.gridy = 1;
-        mainPanel.add(labelFrom, constraints);
-
-        constraints.gridx = 2;
         constraints.gridy = 1;
         mainPanel.add(labelTo, constraints);
 
@@ -423,7 +391,7 @@ public class EmailClient {
 
         JMenuItem restoreSession = new JMenuItem("Restore");
         session.add(restoreSession);
-        saveSession.addActionListener(new ActionRestoreSession());
+        restoreSession.addActionListener(new ActionRestoreSession());
 
 
 
@@ -441,23 +409,25 @@ public class EmailClient {
 
     // setting all text fields to initial state when "New E-mail" button has been pressed
     private static void newMail(){
+
         textFieldUsername.setFont(new Font("Arial", Font.ITALIC, 14));
         textFieldUsername.setForeground(new Color(0x8E8987));
-        textFieldUsername.setText("Your Google username...");
+        textFieldUsername.setText("Your Google e-mail address...");
+
         textFieldPassword.setFont(new Font("Arial", Font.ITALIC, 14));
         textFieldPassword.setForeground(new Color(0x8E8987));
         textFieldPassword.setEchoChar((char) 0);
         textFieldPassword.setText("...and password");
-        textFieldFrom.setFont(new Font("Arial", Font.ITALIC, 14));
-        textFieldFrom.setForeground(new Color(0x8E8987));
-        textFieldFrom.setText("E-mail...");
+
         textFieldTo.setFont(new Font("Arial", Font.ITALIC, 14));
         textFieldTo.setForeground(new Color(0x8E8987));
         textFieldTo.setText("E-mail...");
         textFieldSubject.setText("");
+
         mainText.setFont(new Font("Arial", Font.ITALIC, 14));
         mainText.setForeground(new Color(0x8E8987));
-        mainText.setText("Enter your E-mail here...");
+        mainText.setText("Enter your message here...");
+
         sendButton.requestFocus();
     }
 
@@ -493,10 +463,6 @@ public class EmailClient {
         return Theme.BLACK;
     }
 
-    public String getFromText(){
-        return textFieldFrom.getText();
-    }
-
     public String getToText(){
         return textFieldTo.getText();
     }
@@ -523,13 +489,49 @@ public class EmailClient {
 
     public void restoreSession(String user, String to, String subject, String text, int theme){
 
-        textFieldUsername.setText(user);
-        textFieldTo.setText(to);
+        if (!user.equals("") && !user.equals("Your Google e-mail address...")) {
+            textFieldUsername.setText(user);
+            textFieldUsername.setFont(new Font("Arial", Font.PLAIN, 14));
+            textFieldUsername.setForeground(Color.BLACK);
+        }
+
+        if (!to.equals("") && !to.equals("E-mail...")) {
+            textFieldTo.setText(to);
+            textFieldTo.setFont(new Font("Arial", Font.PLAIN, 14));
+            textFieldTo.setForeground(Color.BLACK);
+        }
+
         textFieldSubject.setText(subject);
-        mainText.setText(text);
+        textFieldSubject.setFont(new Font("Arial", Font.PLAIN, 14));
+        textFieldSubject.setForeground(Color.BLACK);
+
+        if (!text.equals("") && !text.equals("Enter your message here...")) {
+            mainText.setText(text);
+            mainText.setFont(new Font("Arial", Font.PLAIN, 14));
+            mainText.setForeground(Color.BLACK);
+        }
+
+        if (!getUsername().equals("Your Google e-mail address...")) {
+            textFieldPassword.setForeground(new Color(0x8E8987));
+            textFieldPassword.setEchoChar((char) 0);
+            textFieldPassword.setText("Password");
+        }
+
+        if (theme == 0) setPanelTheme(Theme.BEIGE);
         if (theme == 1) setPanelTheme(Theme.BLUE);
         if (theme == 2) setPanelTheme(Theme.PINK);
         if (theme == 3) setPanelTheme(Theme.BLACK);
+    }
+
+    public static String getIP(){
+        InetAddress IP;
+        try {
+            IP = InetAddress.getLocalHost();
+        } catch (UnknownHostException e1) {
+            e1.printStackTrace();
+            return null;
+        }
+        return IP.toString();
     }
 
 }

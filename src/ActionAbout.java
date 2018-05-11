@@ -24,10 +24,10 @@ public class ActionAbout implements ActionListener {
         aboutFrame.getContentPane().add(aboutPanel, BorderLayout.CENTER);
 
         // labels that contain the information
-        JLabel label1 = new JLabel("You must log in with your Google Account.");
-        JLabel label2 = new JLabel("You can then send an e-mail from any");
-        JLabel label3 = new JLabel("e-mail address to any other.");
-        JLabel version = new JLabel("Version: 1.1");
+        JLabel label1 = new JLabel("To be able to send an e-mail, you must first enable");
+        JLabel label2 = new JLabel("'Less secure apps' in your Google account");
+        JLabel label3 = new JLabel("");
+        JLabel version = new JLabel("Version: 1.2");
 
         // creating an "ok" button
         JButton okAbout = new JButton("OK");

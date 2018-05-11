@@ -42,7 +42,7 @@ public class ActionSend implements ActionListener {
             // if the message is sent successfully
 
             Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(ec.getFromText()));
+            message.setFrom(new InternetAddress(ec.getUsername()));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(ec.getToText()));
             message.setSubject(ec.getSubject());
             message.setText(ec.getMailText());
