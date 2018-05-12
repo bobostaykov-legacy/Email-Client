@@ -22,7 +22,7 @@ public class ActionSettings implements ActionListener {
         // setting settings's frame size and positioning it in the middle of the screen
         double screenWidth = Toolkit.getDefaultToolkit().getScreenSize().getWidth();
         double screenHeight = Toolkit.getDefaultToolkit().getScreenSize().getHeight();
-        settFrame.setBounds(((int)screenWidth - 350)/2, ((int)screenHeight - 300)/2,350, 300);
+        settFrame.setBounds(((int)screenWidth - 350)/2, ((int)screenHeight - 300)/2,315, 270);
 
         JPanel settPanel = new JPanel(new GridBagLayout());
         settFrame.getContentPane().add(settPanel, BorderLayout.CENTER);
@@ -75,18 +75,22 @@ public class ActionSettings implements ActionListener {
 
         con.gridx = 0;
         con.gridy = 1;
+        con.insets = new Insets(5,2,0,0);
         settPanel.add(beige, con);
 
         con.gridx = 0;
         con.gridy = 2;
+        con.insets = new Insets(0,0,0,0);
         settPanel.add(blue, con);
 
         con.gridx = 0;
         con.gridy = 3;
+        con.insets = new Insets(0,0,0,0);
         settPanel.add(pink, con);
 
         con.gridx = 0;
         con.gridy = 4;
+        con.insets = new Insets(0,0,0,2);
         settPanel.add(black, con);
 
         con.gridx = 0;
