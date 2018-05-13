@@ -40,8 +40,8 @@ public class EmailClient {
     }
 
 
-
-    public Connection createConnection(){
+    // connecting to the database, where I store the IP addresses and the information (for saving session)
+    private Connection createConnection(){
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             Connection con = DriverManager.getConnection("jdbc:mysql://sql7.freemysqlhosting.net:3306/sql7237193?autoReconnect=true&useSSL=false", "sql7237193", "mWkHzYHaeD");
@@ -92,11 +92,11 @@ public class EmailClient {
 
 
     // setting a new theme
-    public void setPanelTheme(Theme theme){
+    private void setPanelTheme(Theme theme){
 
         if (theme == Theme.BLACK){
 
-            EmailClient.mainPanel.setBackground((Color.BLACK));
+            EmailClient.mainPanel.setBackground(Color.BLACK);
             sendButton.setBackground(new Color(0x1F1F1F));
             boldButton.setBackground(new Color(0x1F1F1F));
             italicButton.setBackground(new Color(0x1F1F1F));
@@ -153,7 +153,7 @@ public class EmailClient {
 
 
 
-    // creating the text area where the actual e-mail text will be written
+    // creating the text area where the actual message will be written
     private void createMainTextArea(){
         mainText.setPreferredSize(new Dimension(900, 470));
         mainText.setBorder(BorderFactory.createLineBorder(new Color(0x796B22)));
@@ -188,7 +188,7 @@ public class EmailClient {
 
 
 
-    // creating text fields for "username", "password", "from", "to" and "subject"
+    // creating text fields for "username", "password", "to" and "subject"
     private void createTextFields(){
         // setting a description font that disappears when the text field gains focus
         textFieldUsername.setFont(new Font("Arial", Font.ITALIC, 14));
@@ -286,7 +286,7 @@ public class EmailClient {
 
 
 
-    // creating labels for "username", "password", "from", "to" and "subject"
+    // creating labels for "username", "password", "to" and "subject"
     private void createLabels(){
         constraints.gridx = 0;
         constraints.gridy = 0;
@@ -321,6 +321,7 @@ public class EmailClient {
         mainPanel.add(sendButton, constraints);
 
 
+        // creating text edit buttons
         boldButton.setAction(new StyledEditorKit.BoldAction());
         boldButton.setPreferredSize(new Dimension(43,35));
         boldButton.setText("B");
@@ -335,7 +336,6 @@ public class EmailClient {
         constraints.insets = new Insets(0,0,15,110);
         mainPanel.add(boldButton, constraints);
 
-        // creating text edit buttons
         italicButton.setAction(new StyledEditorKit.ItalicAction());
         italicButton.setPreferredSize(new Dimension(43,35));
         italicButton.setText("I");
@@ -470,6 +470,14 @@ public class EmailClient {
         return Theme.BLACK;
     }
 
+    public String getUsername() {
+        return textFieldUsername.getText();
+    }
+
+    public String getPass() {
+        return new String (textFieldPassword.getPassword());
+    }
+
     public String getToText(){
         return textFieldTo.getText();
     }
@@ -482,18 +490,11 @@ public class EmailClient {
         return mainText.getText();
     }
 
-    public String getUsername() {
-        return textFieldUsername.getText();
-    }
-
-    public String getPass() {
-        return new String (textFieldPassword.getPassword());
-    }
-
     public Connection getConnecion() {
         return connection;
     }
 
+    // check if the session has been saved
     public boolean getSessionSaved(){
         return sessionSaved;
     }
@@ -502,6 +503,7 @@ public class EmailClient {
         sessionSaved = b;
     }
 
+    // getting the information that has been saved in the database
     public void restoreSession(String user, String to, String subject, String text, int theme){
 
         if (!user.equals("") && !user.equals("Your Google e-mail address...")) {
@@ -538,6 +540,7 @@ public class EmailClient {
         if (theme == 3) setPanelTheme(Theme.BLACK);
     }
 
+    // the ip address of the current PC
     public static String getIP(){
         InetAddress IP;
         try {
@@ -549,6 +552,7 @@ public class EmailClient {
         return IP.toString();
     }
 
+    // checking if this is the first time the program is started on that PC
     public boolean ipInDatabase(){
         String ip = getIP();
         Statement stmt;
@@ -663,6 +667,7 @@ public class EmailClient {
                                         "default");
     }
 
+    // a dialog asking if the user want to save the session before exit
     public void saveQuestion(){
 
         if ((!getUsername().equals("Your Google e-mail address...")
@@ -711,6 +716,7 @@ public class EmailClient {
         }
     }
 
+    // a dialog showing what is new in the current version; only once per PC
     private void whatsNew(){
         ActionSaveSession ss = new ActionSaveSession();
         if (!ipInDatabase()){
