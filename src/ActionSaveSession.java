@@ -32,7 +32,7 @@ public class ActionSaveSession implements ActionListener {
 
         // the ip is already in the database, update values for every text field (except password)
         try {
-            prSt = con.prepareStatement("update email_client set user = ?, toText = ?, subject = ?, mailText = ?, theme = ? where ip = ?");
+            prSt = con.prepareStatement("update email_client set user = ?, toText = ?, subject = ?, message = ?, theme = ? where ip = ?");
             prSt.setString(1, savedUsername);
             prSt.setString(2, savedToText);
             prSt.setString(3, savedSubject);

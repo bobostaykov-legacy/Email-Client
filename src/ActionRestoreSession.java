@@ -25,7 +25,7 @@ public class ActionRestoreSession implements ActionListener {
         String user = getValue("user");
         String to = getValue("toText");
         String subject = getValue("subject");
-        String text = getValue("mailText");
+        String text = getValue("message");
         int theme = Integer.parseInt(getValue("theme"));
 
         ec.restoreSession(user, to, subject, text, theme);

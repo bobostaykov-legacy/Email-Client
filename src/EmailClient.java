@@ -44,7 +44,7 @@ public class EmailClient {
     private Connection createConnection(){
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            Connection con = DriverManager.getConnection("jdbc:mysql://sql7.freemysqlhosting.net:3306/sql7237193?autoReconnect=true&useSSL=false", "sql7237193", "mWkHzYHaeD");
+            Connection con = DriverManager.getConnection("jdbc:mysql://den1.mysql4.gear.host:3306/borisdatabase?autoReconnect=true&useSSL=false", "borisdatabase", "Ly3F!N20-16Z");
             System.out.println("Successfully connected to database!");
             return con;
         } catch (ClassNotFoundException e) {
@@ -92,7 +92,7 @@ public class EmailClient {
 
 
     // setting a new theme
-    private void setPanelTheme(Theme theme){
+    protected void setPanelTheme(Theme theme){
 
         if (theme == Theme.BLACK){
 
