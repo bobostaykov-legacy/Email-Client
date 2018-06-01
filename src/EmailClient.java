@@ -42,9 +42,10 @@ public class EmailClient {
 
     // connecting to the database, where I store the IP addresses and the information (for saving session)
     private Connection createConnection(){
+        Temp t = new Temp();
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            Connection con = DriverManager.getConnection("jdbc:mysql://den1.mysql4.gear.host:3306/borisdatabase?autoReconnect=true&useSSL=false", "borisdatabase", "Ly3F!N20-16Z");
+            Connection con = DriverManager.getConnection("jdbc:mysql://" + t.getA() + ":" + t.getB() + "/" + t.getC() + "?autoReconnect=true&useSSL=false", t.getD(), t.getE());
             System.out.println("Successfully connected to database!");
             return con;
         } catch (ClassNotFoundException e) {
